@@ -9,7 +9,7 @@ import re
 import pymorphy2
 from math import sqrt
 
-conn = sqlite3.connect('параметризація інтерфейс.db')
+conn = sqlite3.connect('main.db')
 cursor = conn.cursor()
 
 
@@ -17,7 +17,7 @@ cursor = conn.cursor()
 # ВОНА СТВОРЮЄ НЕОБХІДНУ КІЛЬКІСТЬ МІСЦЬ ДЛЯ ВСТАВКИ ТЕКСТІВ
 def createPlaceForTexts():
     def showError():
-        messagebox.showerror('Помилка!', 'Введіть, будь ласка, число від 2 до 5')
+        messagebox.showerror('Error!', 'Please, enter a number between 2 and 5!')
     global frame
     global btnCompare
     amount = entryAmount.get() # кількість текстів, вибрана користувачем
