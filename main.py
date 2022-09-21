@@ -13,14 +13,14 @@ conn = sqlite3.connect('main.db')
 cursor = conn.cursor()
 
 
-# ФУНКЦІЯ ВИКЛИККАЄТЬСЯ ПРИ НАТИСКАННІ КНОПКИ "ОК" ПІСЛЯ ТОГО, ЯК КОРИСТУВАЧ ВИБРАВ КІЛЬКІСТЬ ТЕКСТІВ
-# ВОНА СТВОРЮЄ НЕОБХІДНУ КІЛЬКІСТЬ МІСЦЬ ДЛЯ ВСТАВКИ ТЕКСТІВ
+# THE FUNCTION IS CALLED WHEN THE OK BUTTON IS PRESSED AFTER THE USER SELECTS THE NUMBER OF TEXTS
+# IT CREATES THE NECESSARY NUMBER OF SPACES FOR INSERTING TEXTS
 def createPlaceForTexts():
     def showError():
         messagebox.showerror('Error!', 'Please, enter a number between 2 and 5!')
     global frame
     global btnCompare
-    amount = entryAmount.get() # кількість текстів, вибрана користувачем
+    amount = entryAmount.get() # number of texts selected by the user
     w = 1550
     h = 850
 
@@ -93,7 +93,7 @@ def createPlaceForTexts():
 
     if int(amount)<2:
         showError()
-    btnCompare = Button(frame, text = 'Порівняти', bg = "darkblue", font = ("Times New Roman", 10), fg ="white", command = main)
+    btnCompare = Button(frame, text = 'Compare', bg = "darkblue", font = ("Times New Roman", 10), fg ="white", command = main)
     btnCompare.place(x=10, y=380, width=70)
 
 def dropTables():
@@ -148,13 +148,13 @@ def dropTables():
     cursor.execute("""drop table Частота_Лем5""")
     conn.commit()
 
-# ФУНКЦІЯ ВИКЛИКАЄТЬСЯ ПРИ НАТИСКАННІ КНОПКИ "ПОРІВНЯТИ"
-# ВОНА ВИКОНУЄ ОДРАЗУ ДЕКІЛЬКА ДІЙ
-# 1) ЗНИЩУЄ ПОПЕРЕДНІ ВІДЖЕТИ, ТОБТО ОЧИЩУЄ ВІКНО
-# 2) СТВОРЮЄ ТАБЛИЦІ - ЧАСТОТНІ СЛОВНИКИ СЛОВОФОРМ, ЛЕМ І ЧАСТИН МОВИ. ТАКОЖ ВОНА СТВОРЮЄ ПРОМІЖНІ ЧАСТОТНІ СЛОВНИКИ
-#    ЧАСТИН МОВИ І ЛЕМ, ЩОБ КОРИСТУВАЧ ПЕРЕВІРИВ ПРАВИЛЬНІСТЬ ЇХ АВТОМАТИЧНОГО ВИЗНАЧЕННЯ
-# 3) ЗАПОВНЮЄ ТАБЛИЦІ
-# 4) ВИРАХОВУЄ ВСІ ПОТРІБНІ ЗНАЧЕННЯ І ВИВОДИТЬ ЇХ В ДІАЛОГОВОМУ ВІКНІ
+# THE FUNCTION IS CALLED WHEN THE "COMPARE" BUTTON IS PRESSED
+# IT PERFORMS SEVERAL ACTIONS AT ONCE
+# 1) DESTROYES PREVIOUS WIDGETS, IE CLEARS THE WINDOW
+# 2) CREATES TABLES - FREQUENCY DICTIONARIES OF WORD FORMS, LEMMAS AND PARTS OF SPEECH. IT ALSO CREATES INTERMEDIATE FREQUENCY DICTIONARIES
+# OF PARTS OF SPEECH AND LEMMAS FOR THE USER TO CHECK THE CORRECTNESS OF THEIR AUTOMATIC DETERMINATION
+# 3) COMPLETES TABLES
+# 4) CALCULATES ALL THE NECESSARY VALUES AND DISPLAYS THEM IN A DIALOG WINDOW
 def main():
     amount = entryAmount.get()
     btnCompare.destroy()
@@ -296,7 +296,7 @@ def main():
         conn.commit()
     createTables()
 
-    # СТВОРЮЄМО ФУНКЦІЮ, ЯКА БЕРЕ ПАРАМЕТРОМ ТЕКСТ І СТВОРЮЄ СПИСКИ СПИСКІВ З ОДИНИЦЯМИ ТА ЇХ ЧАСТОТАМИ
+    # CREATE A FUNCTION THAT TAKES TEXT AS A PARAMETER AND CREATES LISTS OF LISTS WITH UNITS AND THEIR FREQUENCIES
     def parse_text(get_text):
         global values1_ordered
         global part_of_speech
@@ -333,11 +333,11 @@ def main():
 
         splitted_1 = str(edited).split(' ')
 
-        #Видаляємо пусті слова
+        #delete empty words
         splitted_1 = list(filter(None, splitted_1))
         #print(splitted_1)
 
-        #Додаємо слова у список
+        #Add words to the list
         count = 0
         edited_list = []
         for word in splitted_1:
@@ -346,7 +346,7 @@ def main():
         sample_1_dict = {}
         sample_1_list = []
 
-        #Список з частотами
+        #List of frequencies
         for word in edited_list:
             sample_1_list.append(word)
             if word in sample_1_dict:
@@ -357,7 +357,7 @@ def main():
 
         values1 = list(sample_1_dict.values())
 
-        #Створюємо частотний словник словоформ
+        # Create a frequency dictionary of word forms
         values1_ordered = []
         for i in values1:
             values1_ordered.append(i)
@@ -366,14 +366,12 @@ def main():
             if values1_ordered[count][1] < values1_ordered[count+1][1]:
                 values1_ordered[count], values1_ordered[count+1] = values1_ordered[count+1], values1_ordered[count]
             count += 1
-        #print(values1_ordered)
 
         morph = pymorphy2.MorphAnalyzer(lang='uk')
         part_of_speech_freq = []
         part_of_speech = {}
-        #print(sample_1_list)
 
-        #складаємо словник частин мови
+        # Compile a dictionary of parts of speech
         for i in sample_1_list:
             parsed1 = morph.parse(i)[0]
             part_of_sp = parsed1.tag.POS
@@ -381,21 +379,18 @@ def main():
                 part_of_speech[i][2] +=1
             else:
                 part_of_speech[i]=[i, part_of_sp, 1]
-        #print(part_of_speech)
 
 
 
         lemmas = {}
         for i in sample_1_list:
             normal_form = morph.parse(i)[0].normal_form
-            #print(normal_form)
             if normal_form in lemmas:
                 lemmas[normal_form][2] += 1
             else:
                 lemmas[normal_form] = [i]
                 lemmas[normal_form].append(normal_form)
                 lemmas[normal_form].append(1)
-        #print(lemmas)
 
         values3 = list(lemmas.values())
 
@@ -412,9 +407,9 @@ def main():
     def insertIntoDataBase():
         amount = entryAmount.get()
         def insertForText1():
-            get_text1 = str(text1.get(1.0, END)) # отримуємо тексти, введені користувачем
+            get_text1 = str(text1.get(1.0, END)) # receive the texts entered by the user
             text1.destroy()
-            parse_text(get_text1) # викликаємо функцію для обробки першого тексту
+            parse_text(get_text1) # call the function to process the first text
             for i in values1_ordered:
                 cursor.execute("""INSERT INTO Словоформи
                                        VALUES (?, ?)""", i)
@@ -426,15 +421,14 @@ def main():
             conn.commit()
 
 
-            # Створюємо частотний словник частин мови
+            # Create a frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови")
             rows = cursor.fetchall()
 
-            #складаємо словник частоти частин мови
+            # Compile a frequency dictionary of parts of speech
             values2 = {}
             for row in rows:
                 part_of_speech_freq.append(row[1:3])
-            #print(part_of_speech_freq)
 
             for i in part_of_speech_freq:
                 if i[0] in values2:
@@ -443,7 +437,6 @@ def main():
                     values2[i[0]] = [i[0], i[1]]
 
             values2 = list(values2.values())
-            #print(values2)
 
             for i in values2:
                 if i[0] == None:
@@ -457,7 +450,6 @@ def main():
                 if values2_ordered[count][1] < values2_ordered[count+1][1]:
                     values2_ordered[count], values2_ordered[count+1] = values2_ordered[count+1], values2_ordered[count]
                 count += 1
-            #print(values2_ordered)
 
 
             for i in values2_ordered:
@@ -478,7 +470,6 @@ def main():
             lemmas_edited = {}
             for row in rows:
                 lemmas_freq.append(row[1:3])
-            #print(lemmas_edited)
 
             for i in lemmas_freq:
                 if i[0] in lemmas_edited:
@@ -487,7 +478,6 @@ def main():
                     lemmas_edited[i[0]] = [i[0], i[1]]
 
             lemmas_edited = list(lemmas_edited.values())
-            #print(lemmas_edited)
 
             for i in lemmas_edited:
                 if i[0] == None:
@@ -501,7 +491,6 @@ def main():
                 if lemmas_edited_ordered[count][1] < lemmas_edited_ordered[count+1][1]:
                         lemmas_edited_ordered[count], lemmas_edited_ordered[count+1] = lemmas_edited_ordered[count+1], lemmas_edited_ordered[count]
                 count += 1
-            #print(lemmas_edited_ordered)
 
             for i in lemmas_edited_ordered:
                 cursor.execute("""INSERT INTO Частота_Лем
@@ -522,15 +511,14 @@ def main():
             conn.commit()
 
 
-                # Створюємо частотний словник частин мови
+                # Create a frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови2")
             rows = cursor.fetchall()
 
-                #складаємо словник частоти частин мови
+                #compile a frequency dictionary of parts of speech
             values2 = {}
             for row in rows:
                     part_of_speech_freq.append(row[1:3])
-            #print(part_of_speech_freq)
 
             for i in part_of_speech_freq:
                     if i[0] in values2:
@@ -539,7 +527,6 @@ def main():
                         values2[i[0]] = [i[0], i[1]]
 
             values2 = list(values2.values())
-                #print(values2)
 
             for i in values2:
                     if i[0] == None:
@@ -554,7 +541,6 @@ def main():
                         if values2_ordered[count][1] < values2_ordered[count+1][1]:
                             values2_ordered[count], values2_ordered[count+1] = values2_ordered[count+1], values2_ordered[count]
                         count += 1
-                #print(values2_ordered)
 
 
             for i in values2_ordered:
@@ -601,7 +587,7 @@ def main():
                         if lemmas_edited_ordered[count][1] < lemmas_edited_ordered[count+1][1]:
                               lemmas_edited_ordered[count], lemmas_edited_ordered[count+1] = lemmas_edited_ordered[count+1], lemmas_edited_ordered[count]
                         count += 1
-                    #print(lemmas_edited_ordered)
+                  
 
             for i in lemmas_edited_ordered:
                         cursor.execute("""INSERT INTO Частота_Лем2
@@ -622,15 +608,14 @@ def main():
             conn.commit()
 
 
-                # Створюємо частотний словник частин мови
+                # create a frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови3")
             rows = cursor.fetchall()
 
-                #складаємо словник частоти частин мови
+                #compile a frequency dictionary of parts of speech
             values2 = {}
             for row in rows:
                     part_of_speech_freq.append(row[1:3])
-            #print(part_of_speech_freq)
 
             for i in part_of_speech_freq:
                     if i[0] in values2:
@@ -639,7 +624,6 @@ def main():
                         values2[i[0]] = [i[0], i[1]]
 
             values2 = list(values2.values())
-                #print(values2)
 
             for i in values2:
                     if i[0] == None:
@@ -654,7 +638,6 @@ def main():
                         if values2_ordered[count][1] < values2_ordered[count+1][1]:
                             values2_ordered[count], values2_ordered[count+1] = values2_ordered[count+1], values2_ordered[count]
                         count += 1
-                #print(values2_ordered)
 
 
             for i in values2_ordered:
@@ -677,7 +660,6 @@ def main():
             lemmas_edited = {}
             for row in rows:
                     lemmas_freq.append(row[1:3])
-                    #print(lemmas_edited)
 
             for i in lemmas_freq:
                     if i[0] in lemmas_edited:
@@ -686,7 +668,6 @@ def main():
                         lemmas_edited[i[0]] = [i[0], i[1]]
 
             lemmas_edited = list(lemmas_edited.values())
-                #print(lemmas_edited)
 
             for i in lemmas_edited:
                     if i[0] == None:
@@ -701,7 +682,6 @@ def main():
                         if lemmas_edited_ordered[count][1] < lemmas_edited_ordered[count+1][1]:
                               lemmas_edited_ordered[count], lemmas_edited_ordered[count+1] = lemmas_edited_ordered[count+1], lemmas_edited_ordered[count]
                         count += 1
-                    #print(lemmas_edited_ordered)
 
             for i in lemmas_edited_ordered:
                         cursor.execute("""INSERT INTO Частота_Лем3
@@ -722,15 +702,14 @@ def main():
             conn.commit()
 
 
-                # Створюємо частотний словник частин мови
+                # create a frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови4")
             rows = cursor.fetchall()
 
-                #складаємо словник частоти частин мови
+                #compile a frequency dictionary of parts of speech
             values2 = {}
             for row in rows:
                     part_of_speech_freq.append(row[1:3])
-            #print(part_of_speech_freq)
 
             for i in part_of_speech_freq:
                     if i[0] in values2:
@@ -739,7 +718,6 @@ def main():
                         values2[i[0]] = [i[0], i[1]]
 
             values2 = list(values2.values())
-                #print(values2)
 
             for i in values2:
                     if i[0] == None:
@@ -754,7 +732,6 @@ def main():
                         if values2_ordered[count][1] < values2_ordered[count+1][1]:
                             values2_ordered[count], values2_ordered[count+1] = values2_ordered[count+1], values2_ordered[count]
                         count += 1
-                #print(values2_ordered)
 
 
             for i in values2_ordered:
@@ -777,7 +754,6 @@ def main():
             lemmas_edited = {}
             for row in rows:
                     lemmas_freq.append(row[1:3])
-                    #print(lemmas_edited)
 
             for i in lemmas_freq:
                     if i[0] in lemmas_edited:
@@ -786,7 +762,6 @@ def main():
                         lemmas_edited[i[0]] = [i[0], i[1]]
 
             lemmas_edited = list(lemmas_edited.values())
-                #print(lemmas_edited)
 
             for i in lemmas_edited:
                     if i[0] == None:
@@ -801,7 +776,6 @@ def main():
                         if lemmas_edited_ordered[count][1] < lemmas_edited_ordered[count+1][1]:
                               lemmas_edited_ordered[count], lemmas_edited_ordered[count+1] = lemmas_edited_ordered[count+1], lemmas_edited_ordered[count]
                         count += 1
-                    #print(lemmas_edited_ordered)
 
             for i in lemmas_edited_ordered:
                         cursor.execute("""INSERT INTO Частота_Лем4
@@ -822,15 +796,14 @@ def main():
             conn.commit()
 
 
-                # Створюємо частотний словник частин мови
+                # create a frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови5")
             rows = cursor.fetchall()
 
-                #складаємо словник частоти частин мови
+                #compile a frequency dictionary of parts of speech
             values2 = {}
             for row in rows:
                     part_of_speech_freq.append(row[1:3])
-            #print(part_of_speech_freq)
 
             for i in part_of_speech_freq:
                     if i[0] in values2:
@@ -839,7 +812,6 @@ def main():
                         values2[i[0]] = [i[0], i[1]]
 
             values2 = list(values2.values())
-                #print(values2)
 
             for i in values2:
                     if i[0] == None:
@@ -854,7 +826,6 @@ def main():
                         if values2_ordered[count][1] < values2_ordered[count+1][1]:
                             values2_ordered[count], values2_ordered[count+1] = values2_ordered[count+1], values2_ordered[count]
                         count += 1
-                #print(values2_ordered)
 
 
             for i in values2_ordered:
@@ -877,7 +848,6 @@ def main():
             lemmas_edited = {}
             for row in rows:
                     lemmas_freq.append(row[1:3])
-                    #print(lemmas_edited)
 
             for i in lemmas_freq:
                     if i[0] in lemmas_edited:
@@ -886,7 +856,6 @@ def main():
                         lemmas_edited[i[0]] = [i[0], i[1]]
 
             lemmas_edited = list(lemmas_edited.values())
-                #print(lemmas_edited)
 
             for i in lemmas_edited:
                     if i[0] == None:
@@ -901,7 +870,6 @@ def main():
                         if lemmas_edited_ordered[count][1] < lemmas_edited_ordered[count+1][1]:
                               lemmas_edited_ordered[count], lemmas_edited_ordered[count+1] = lemmas_edited_ordered[count+1], lemmas_edited_ordered[count]
                         count += 1
-                    #print(lemmas_edited_ordered)
 
             for i in lemmas_edited_ordered:
                         cursor.execute("""INSERT INTO Частота_Лем5
@@ -928,7 +896,7 @@ def main():
     insertIntoDataBase()
 
     def common():
-       # ВИТЯГУЄМО ІЗ ТАБЛИЦЬ ДАНІ
+       # EXTRACT DATA FROM TABLES
         def getDataFromDataBase():
             global words_freq1
             global words_freq2
@@ -950,7 +918,7 @@ def main():
             words_freq1 = []
             for row in rows:
                 words_freq1.append([row[0], row[1]])
-            words_freq1 = tuple(words_freq1) # оскільки функції змінюють параметри, переводимо дані в незмінний тип даних - tuple
+            words_freq1 = tuple(words_freq1) # since the functions change the parameters, we convert the data into an immutable data type - tuple
             #print(words_freq1)
             cursor.execute('select * from Словоформи2')
             rows = cursor.fetchall()
@@ -1036,18 +1004,16 @@ def main():
                 lemmas_freq5.append(row)
         getDataFromDataBase()
 
-        # СТВОРЮЄМО ФУНКЦІЮ ДЛЯ ОБРАХУВАННЯ ЕВКЛІДОВОЇ, ЖАККАРДОВОЇ ТА КОСИНУСНОЇ ВІДСТАНЕЙ, ЯКА ПАРАМЕТРАМИ ПРИЙМАЄ СЛОВОФОРМИ З ЧАСТОТОЮ
+        # CREATE A FUNCTION FOR CALCULATING EUCLIDE, JACCARD AND COSINE DISTANCES, WHICH ACCEPTS WORD FORMS WITH FREQUENCY AS PARAMETERS
         def countValues(words_freq_1, words_freq_2):
             global euclidean_distance
             global jacquard_distance
             global cosine_distance
-            #print('words_freq_1: '+ str(words_freq_1))
 
             double_freq_dict = {i[0]: [i[1]] for i in words_freq_1}
             keys = []
             for i in words_freq_1:
                 keys.append(i[0])
-            #print(edited_2_list)
 
             for i in words_freq_2:
                 if i[0] not in keys:
@@ -1062,35 +1028,30 @@ def main():
 
             double_freq_list = list(double_freq_dict.values())
             double_freq_list.sort()
-            #print(double_freq_list)
             count = 0
             while count in range(0, len(double_freq_list)-1):
                 if double_freq_list[count][0] < double_freq_list[count+1][0]:
                     double_freq_list[count], double_freq_list[count+1] = double_freq_list[count+1], double_freq_list[count]
                 count += 1
-            #print(double_freq_list)
 
 
-            #Обчислюємо евклідову відстань, косинусну схожість і косинусну відстань
+            # Calculate the Euclidean distance, cosine similarity and cosine distance
             ai_minus_bi_squared = []
             ai_multiply_bi = []
             ai_squared = []
             bi_squared = []
             intersection_of_a_b = []
-            #print(double_freq_list)
             for i in double_freq_list:
                 ai_minus_bi_squared.append((i[0]-i[1])**2)
                 ai_multiply_bi.append(i[0]*i[1])
                 ai_squared.append(i[0]**2)
                 bi_squared.append(i[1]**2)
-                #print(str(i[1]) + str(i[2]))
-                #print(ai_minus_bi_squared)
             euclidean_distance = round(sqrt(sum(ai_minus_bi_squared)), 3)
             cosine_similarity = round(sum(ai_multiply_bi)/(sqrt(sum(ai_squared))*sqrt(sum(bi_squared))), 3)
             cosine_distance = round(1-cosine_similarity, 3)
 
 
-            #Обчислюємо індекс і відстань Жаккарда
+            # Calculate the Jaccard index and distance
             for i in double_freq_list:
                 if 0 not in i:
                     intersection_of_a_b.append(i[0])
@@ -1098,7 +1059,7 @@ def main():
             jacquard_distance = round(1-jacquard_index, 3)
 
 
-        # СТВОРЮЄМО ФУНКЦІЮ ДЛЯ ОБРАХУВАННЯ ІНДЕКСІВ, ЯКА ПАРАМЕТРАМИ ПРИЙМАЄ ЧАСТИНИ МОВИ З ЧАСТОТОЮ
+        # CREATE A FUNCTION FOR CALCULATING INDICES, WHICH ACCEPTS PARTS OF LANGUAGE WITH FREQUENCY AS PARAMETERS
         def countIndexes(parts_of_speech_freq):
             global epitet_index
             global verb_attribute_index
@@ -1142,7 +1103,7 @@ def main():
                 degree_of_nominality = str(sum_noun) + "/" +str(sum_verb) + ' = ' +  str(round(sum_noun/sum_verb, 3))
 
 
-        # СТВОРЮЄМО ФУНКЦІЮ ДЛЯ ОБРАХУВАННЯ ПАРАМЕТРІВ, ЯКА ПАРАМЕТРАМИ ПРИЙМАЄ СЛОВОФОРМИ І ЛЕМИ З ЧАСТОТАМИ
+        # CREATE A FUNCTION FOR CALCULATING PARAMETERS, WHICH ACCEPTS WORD FORMS AND LEMMAS WITH FREQUENCY AS PARAMETERS
         def counParameters(words_freq, lemmas_freq):
             global N
             global V
@@ -1151,23 +1112,19 @@ def main():
             global V10_dict
             global L
             words = []
-            #words_freq = list(words_freq.values())
 
             for i in words_freq:
                 words.append(i[1])
             N = sum(words)
-            #print(N)
             slovoformy = []
             for i in words_freq:
                 slovoformy.append(i[0])
             V = len(slovoformy)
-            #print(V)
             V1 = []
             for i in words_freq:
                 if i[1] == 1:
                     V1.append(i[1])
             V1 = len(V1)
-            #print(V1)
             V10_text = []
             for i in words_freq:
                 if i[1] > 10:
@@ -1178,7 +1135,6 @@ def main():
                 if i[1] > 10:
                     V10_dict.append(i[1])
             V10_dict = len(V10_dict)
-            #print(V10)
             L = []
             for i in lemmas_freq:
                 L.append(i[0])
@@ -1186,7 +1142,7 @@ def main():
 
 
 
-        # СТВОРЮЄМО ФУНКЦІЮ, ЯКА ПРИЙМАЄ ПАРАМЕТРАМИ НОМЕР ТЕКСТУ І ПОЛОЖЕННЯ ЗА х, СТВОРЮЄ "ТАБЛИЦІ" З ІНДЕКСАМИ І ПАРАМЕТРАМИ ТЕКСТІВ
+        # CREATE A FUNCTION WHICH ACCEPTS THE TEXT NUMBER AND POSITION BY x AS PARAMETERS, CREATES "TABLES" WITH INDEXES AND TEXT PARAMETERS
         def printIndexesAndParameters(number, x):
             global lblIndexes1
             global lblIndexes2
@@ -1212,8 +1168,8 @@ def main():
                                     font = ("Times New Roman", 10), bg = "white")
             lblParameters2.place(x=x, y=490, width=280)
 
-        # В ЗАЛЕЖНОСТІ ВІД КІЛЬКЛСТІ ТЕКСТІВ, ДЛЯ КОЖНОГО ТЕКСТУ ПО ЧЕРЗІ ВИКЛИКАЄМО ФУНКЦІЇ, ЩО РАХУЮТЬ ІНДЕКСИ І ПАРАМЕТРИ,
-        # А ПОТІМ ФУНКЦІЮ, ЗА ЗАПИСУЄ ЇХ В "ТАБЛИЦІ" І ВИВОДИТЬ В ДІАЛОГОВЕ ВІКНО
+        # DEPENDING ON THE NUMBER OF TEXTS, FOR EACH TEXT WE CALL THE FUNCTIONS THAT COUNT THE INDEXES AND PARAMETERS,
+        # AND THEN THE FUNCTION THAT RECORDS THEM IN THE "TABLE" AND DISPLAYS THEM IN A DIALOG WINDOW
         def getValuesIndexesParameters():
             if int(amount)==5:
                 countIndexes(parts_of_speech_freq1)
@@ -1264,13 +1220,13 @@ def main():
                 printIndexesAndParameters(2, 330)
         getValuesIndexesParameters()
 
-        # В ЗАЛЕЖНОСТІ ВІД КІЛЬКОСТІ ТЕКСТІВ, СТВОРЮЄМО "ТАБЛИЦІ" З ДАНИМИ ПРО ВІДСТАНІ
-        # ОСКЛЬКИ ВСТАВИТИ ТАБЛИЦЮ НЕМАЄ ЗМОГИ, ВОНИ СКЛАДАЮТЬСЯ З ЯРЛИКІВ
-        # СТОВПЦІ: (Хмін-1) - Хмах
-        # РЯДКИ: Хмін - (Хмах-1)
+        # DEPENDING ON THE NUMBER OF TEXTS, WE CREATE "TABLES" WITH DISTANCE DATA
+        # SINCE IT IS NOT POSSIBLE TO INSERT A TABLE, THEY CONSIST OF LABLES
+        # COLUMNS: (Xmin-1) - Xmax
+        # LINES: Xmin - (Xmax-1)
         def drawTables():
             if int(amount)==5:
-                    # створюємо фрейм, де помістимо першу "таблицю" та ярлики, які міститимуть назви рядків/стовпців або будуть пустими
+                    # create a frame where we will place the first "table" and labels that will contain row/column names or will be empty
                     frameEuclideusDistance = Frame(root)
                     frameEuclideusDistance.place(x=30, y=30, width=250, heigh=300)
                     lblName = Label(frameEuclideusDistance, text='Евклідова відстань' ,font = ("Times New Roman", 12), fg='darkblue', bg = "white") # ярлик з назвою
@@ -1288,7 +1244,7 @@ def main():
                     lbl1 = Label(frameEuclideusDistance, text='Текст 1' ,font = ("Times New Roman", 10), bg = "white")
                     lbl1.place(relx=0, rely=0.34, width=50, heigh=50)
 
-                    # створюємо фрейм, де помістимо другу "таблицю" та ярлики, які міститимуть назви рядків/стовпців або будуть пустими
+                    # create a frame where we will place the second "table" and labels that will contain row/column names or will be empty
                     frameCosineDistance = Frame(root)
                     frameCosineDistance.place(x=330, y=30, width=250, heigh=300)
                     lblName = Label(frameCosineDistance, text='Косинусна відстань' ,font = ("Times New Roman", 12), fg='darkblue', bg = "white")
@@ -1306,7 +1262,7 @@ def main():
                     lbl1 = Label(frameCosineDistance, text='Текст 1' ,font = ("Times New Roman", 10), bg = "white")
                     lbl1.place(relx=0, rely=0.34, width=50, heigh=50)
 
-                    # створюємо фрейм, де помістимо третю "таблицю" та ярлики, які міститимуть назви рядків/стовпців або будуть пустими
+                    # create a frame where we will place the third "table" and labels that will contain row/column names or will be empty
                     frameJacquardDistance = Frame(root)
                     frameJacquardDistance.place(x=630, y=30, width=250, heigh=300)
                     lblName = Label(frameJacquardDistance, text='Відстань Жаккарда' ,font = ("Times New Roman", 12), fg='darkblue', bg = "white")
@@ -1324,7 +1280,7 @@ def main():
                     lbl1 = Label(frameJacquardDistance, text='Текст 1' ,font = ("Times New Roman", 10), bg = "white")
                     lbl1.place(relx=0, rely=0.34, width=50, heigh=50)
 
-                    # викликаємо функцію, яка обчислює відстані для першого і другого текстів
+                    # call the function that calculates the distances for the first and second texts
                     countValues(words_freq1, words_freq2)
                     # створюємо ярлики зі значеннями 3 відстаней для першого і другого текстів
                     lbl1_2 = Label(frameEuclideusDistance, text=str(euclidean_distance) ,font = ("Times New Roman", 10), bg = "white")
@@ -1334,7 +1290,7 @@ def main():
                     lbl1_2 = Label(frameJacquardDistance, text=str(jacquard_distance) ,font = ("Times New Roman", 10), bg = "white")
                     lbl1_2.place(relx=0.2, rely=0.34, width=50, heigh=50)
 
-                    # викликаємо функцію, яка обчислює відстані для другого і третього текстів
+                    # call the function that calculates the distances for the second and third texts
                     countValues(words_freq1, words_freq3)
                     # створюємо ярлики зі значеннями 3 відстаней для другого і третього текстів
                     lbl1_3 = Label(frameEuclideusDistance, text=str(euclidean_distance) ,font = ("Times New Roman", 10), bg = "white")
@@ -1722,8 +1678,8 @@ def main():
         btnDropTables.place(x=1300, y=30)
     common()
 
-    # ПІСЛЯ НАТИСКАННЯ НА КНОПКУ З НАЗВОЮ ПЕВНОГО СЛОВНИКА, ЙОГО ВМІСТ ВИВОДИТЬСЯ НА ЕКРАН
-    # ТУТ ТАКОЖ Є КНОПКИ ДЛЯ ЗМІНИ ЗМІСТУ СЛОВНИКІВ
+    # AFTER PRESSING THE BUTTON WITH THE NAME OF A SPECIFIC DICTIONARY, ITS CONTENTS ARE DISPLAYED ON THE SCREEN
+     # THERE ARE ALSO BUTTONS TO CHANGE THE CONTENTS OF DICTIONARIES
     def lablesShowTables():
         def lablesShowTable1():
             btnShowTables1 = Button(root, text='Переглянути частотні словники 1 вірша', bg = "darkblue", font = ("Times New Roman", 10),
@@ -1768,7 +1724,7 @@ def main():
             lablesShowTable2()
 
 
-    # СТВОРЮЄМО ФУНКЦІЇ, ЯКІ ВНОСЯТЬ В БАЗИ ДАНИХ ЗМІНИ, ВВЕДЕНІ КОРИСТУВАЧЕМ
+    # CREATE FUNCTIONS WHICH MAKE CHANGES INTRODUCED BY THE USER IN THE DATABASES
     def change1_2():
             word = entry1.get()
             partOfSp = listbox.get(ANCHOR)
@@ -1778,7 +1734,7 @@ def main():
             cursor.execute(sql, (partOfSp, word))
             conn.commit()
 
-            # Оновлюємо частотний словник частин мови
+            # updating the frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови")
             rows = cursor.fetchall()
             values2 = {}
@@ -1833,7 +1789,7 @@ def main():
             cursor.execute(sql, (lemma, word))
             conn.commit()
 
-             # Оновлюємо частотний словник лем
+             # updating the frequency dictionary of lemmas
             cursor.execute("select * from Леми")
             rows = cursor.fetchall()
             values2 = {}
@@ -1887,7 +1843,7 @@ def main():
             cursor.execute(sql, (partOfSp, word))
             conn.commit()
 
-            # Оновлюємо частотний словник частин мови
+            # updating the frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови2")
             rows = cursor.fetchall()
 
@@ -1943,7 +1899,7 @@ def main():
             cursor.execute(sql, (lemma, word))
             conn.commit()
 
-             # Оновлюємо частотний словник лем
+             # updating the frequency dictionary of lemmas
             cursor.execute("select * from Леми2")
             rows = cursor.fetchall()
             values2 = {}
@@ -1997,7 +1953,7 @@ def main():
             cursor.execute(sql, (partOfSp, word))
             conn.commit()
 
-            # Оновлюємо частотний словник частин мови
+            # updating the frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови3")
             rows = cursor.fetchall()
 
@@ -2053,7 +2009,7 @@ def main():
             cursor.execute(sql, (lemma, word))
             conn.commit()
 
-             # Оновлюємо частотний словник лем
+             # updating the frequency dictionary of lemmas
             cursor.execute("select * from Леми3")
             rows = cursor.fetchall()
             values2 = {}
@@ -2107,7 +2063,7 @@ def main():
             cursor.execute(sql, (partOfSp, word))
             conn.commit()
 
-            # Оновлюємо частотний словник частин мови
+            # updating the frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови4")
             rows = cursor.fetchall()
             values2 = {}
@@ -2161,7 +2117,7 @@ def main():
             cursor.execute(sql, (lemma, word))
             conn.commit()
 
-             # Оновлюємо частотний словник лем
+             # updating the frequency dictionary of lemmas
             cursor.execute("select * from Леми4")
             rows = cursor.fetchall()
             values2 = {}
@@ -2215,7 +2171,7 @@ def main():
             cursor.execute(sql, (partOfSp, word))
             conn.commit()
 
-            # Оновлюємо частотний словник частин мови
+            # updating the frequency dictionary of parts of speech
             cursor.execute("select * from Частини_Мови5")
             rows = cursor.fetchall()
             values2 = {}
@@ -2269,7 +2225,7 @@ def main():
             cursor.execute(sql, (lemma, word))
             conn.commit()
 
-            # Оновлюємо частотний словник лем
+            # updating the frequency dictionary of lemmas
             cursor.execute("select * from Леми5")
             rows = cursor.fetchall()
             values2 = {}
@@ -2315,7 +2271,7 @@ def main():
             txtTable1.insert(1.0, print_records)
 
 
-    # СТВОРЮЄМО ФУНКЦІЇ, ЯКІ СТВОРЮЮТЬ ДОЧІРНЄ ВІКНО ТА ВИВОДЯТЬ В НЬОМУ КНПКИ З НАЗВАМИ ЧАСТОТНИХ СЛОВНИКІВ ОБРАНОГО ТЕКСТУ
+    # CREATE FUNCTIONS THAT CREATE A CHILD WINDOW AND DISPLAY BUTTONS IN IT WITH THE NAMES OF FREQUENCY DICTIONARIES OF THE SELECTED TEXT
     def createChildren():
         global children
         children = Toplevel(root)
@@ -2749,7 +2705,7 @@ def main():
 
 
 
-# СТВОРЮЄМО ДІАЛОГОВЕ ВІКНО З ПОЧАТКОВИМИ ВІДЖЕТАМИ
+# CREATE A DIALOG WINDOW WITH INITIAL WIDGETS
 root = Tk()
 root.title("Параметризація")
 root.geometry('1500x800+50+16')
@@ -2767,6 +2723,6 @@ root.mainloop()
 
 
 
-# ВИДАЛЯЄМО ВСІ ТАБЛИЦІ, ЩОБ БУЛА ЗМОГА ЗАПУСКАТИ ПРОГРАМУ БАГАТО РАЗІВ
+# DELETE ALL TABLES TO BE ABLE TO RUN THE PROGRAM MANY TIMES
 
 dropTables()
